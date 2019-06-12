@@ -4,11 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,7 +18,7 @@ import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
 import com.mycode.weatherapp.R;
-import com.mycode.weatherapp.Database.Repository;
+import com.mycode.weatherapp.persistence.Repository;
 import com.mycode.weatherapp.adapter.PagerAdapter;
 import com.mycode.weatherapp.internetConnection.CheckConnection;
 import com.mycode.weatherapp.tabs.Tab1;
@@ -28,10 +28,20 @@ import com.mycode.weatherapp.tabs.Tab4;
 import com.mycode.weatherapp.tabs.Tab5;
 import com.mycode.weatherapp.tabs.Tab6;
 import com.mycode.weatherapp.tabs.Tab7;
+import com.mycode.weatherapp.viewmodels.ViewModelProviderFactory;
+
 import java.util.Calendar;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements Tab1.OnFragmentInteractionListener, Tab2.OnFragmentInteractionListener,
+import javax.inject.Inject;
+
+import dagger.android.support.DaggerAppCompatActivity;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+public class MainActivity extends DaggerAppCompatActivity implements Tab1.OnFragmentInteractionListener, Tab2.OnFragmentInteractionListener,
 Tab3.OnFragmentInteractionListener, Tab4.OnFragmentInteractionListener, Tab5.OnFragmentInteractionListener, Tab6.OnFragmentInteractionListener ,
 Tab7.OnFragmentInteractionListener{
 
@@ -47,13 +57,22 @@ Tab7.OnFragmentInteractionListener{
     private String APITime5;
     private String APITime6;
     private String APITime7;
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
+    @Inject
+    ViewModelProviderFactory providerFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        MainViewModel viewModel = ViewModelProviders.of(this, providerFactory).get(MainViewModel.class);
+        viewModel.getcount().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                System.out.println("hellloooo  "+ integer);
+            }
+        });
         progressDialog = new ProgressDialog(MainActivity.this);
         progressDialog.setTitle("Fetching Location");
         progressDialog.setCancelable(false);
@@ -67,6 +86,7 @@ Tab7.OnFragmentInteractionListener{
         now.add(Calendar.HOUR, 24);
         Date date2 = now.getTime();
         APITime2 = sevenDates.getWholeDate(date2);
+        System.out.println("time "+APITime2);
         tabLayout.addTab(tabLayout.newTab().setText(sevenDates.getMonthDate(now.getTime())));
         now.add(Calendar.HOUR, 24);
         Date date3 = now.getTime();
@@ -108,8 +128,14 @@ Tab7.OnFragmentInteractionListener{
         });
 
         if (checkConnection.isOnline()) {
-            viewModel.deleteCurrentWeather();
-            viewModel.deleteDailyWeather();
+            mDisposable.add(viewModel.deleteCurrentWeather()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe());
+            mDisposable.add(viewModel.deleteDailyWeather()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe());
             Repository.noWifi = false;
             googleApi();
         }else{
@@ -120,6 +146,7 @@ Tab7.OnFragmentInteractionListener{
     public LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
+            progressDialog.dismiss();
             if(Repository.counter == 0 ) {
                 Repository.counter++;
                 Bundle bundle = new Bundle();
@@ -248,12 +275,10 @@ Tab7.OnFragmentInteractionListener{
 
     @Override
     public void onFragmentInteraction(Uri uri) { }
-
-
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        onDestroy();
-        finish();
+    public void onStop() {
+        super.onStop();
+        Repository.counter = 0;
+        mDisposable.clear();
     }
 }

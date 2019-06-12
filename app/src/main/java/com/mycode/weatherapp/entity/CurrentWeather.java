@@ -27,6 +27,31 @@ public class CurrentWeather {
     @SerializedName("apparentTemperature")
     private String apparentTemp = "";
 
+    @SerializedName("precipType")
+    private String precipType = "";
+
+    @SerializedName("precipProbability")
+    private String precipProbability = "";
+
+    public String getPrecipType() {
+        if(precipType==null){
+            precipType = "N/A";
+        }
+        return precipType;
+    }
+
+    public void setPrecipType(String precipType) {
+        this.precipType = precipType;
+    }
+
+    public String getPrecipProbability() {
+        return precipProbability;
+    }
+
+    public void setPrecipProbability(String precipProbability) {
+        this.precipProbability = precipProbability;
+    }
+
     public String getSummary() {
         return summary;
     }

@@ -1,0 +1,210 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 18,
+    "identityHash": "3ee520c682c3a5366c3085b4528fa794",
+    "entities": [
+      {
+        "tableName": "currentWeatherTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `summary` TEXT, `temperature` TEXT, `windSpeed` TEXT, `humidity` TEXT, `apparentTemp` TEXT, `precipType` TEXT, `precipProbability` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperature",
+            "columnName": "temperature",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "windSpeed",
+            "columnName": "windSpeed",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "humidity",
+            "columnName": "humidity",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "apparentTemp",
+            "columnName": "apparentTemp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "precipType",
+            "columnName": "precipType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "precipProbability",
+            "columnName": "precipProbability",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "dailyWeatherTable",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tab` TEXT, `summary` TEXT, `humidity` TEXT, `dewPoint` TEXT, `windSpeed` TEXT, `precipType` TEXT, `precipProbability` TEXT, `temperatureHigh` TEXT, `temperatureLow` TEXT, `windBearing` TEXT, `pressure` TEXT, `visibility` TEXT, `moonPhase` TEXT, `sunriseTime` TEXT, `sunsetTime` TEXT, `cloudCover` TEXT, `temperatureHighTime` TEXT, `temperatureLowTime` TEXT, `precipIntensityMaxTime` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tab",
+            "columnName": "tab",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "humidity",
+            "columnName": "humidity",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dewPoint",
+            "columnName": "dewPoint",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "windSpeed",
+            "columnName": "windSpeed",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "precipType",
+            "columnName": "precipType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "precipProbability",
+            "columnName": "precipProbability",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperatureHigh",
+            "columnName": "temperatureHigh",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperatureLow",
+            "columnName": "temperatureLow",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "windBearing",
+            "columnName": "windBearing",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pressure",
+            "columnName": "pressure",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "visibility",
+            "columnName": "visibility",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "moonPhase",
+            "columnName": "moonPhase",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sunriseTime",
+            "columnName": "sunriseTime",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sunsetTime",
+            "columnName": "sunsetTime",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cloudCover",
+            "columnName": "cloudCover",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperatureHighTime",
+            "columnName": "temperatureHighTime",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperatureLowTime",
+            "columnName": "temperatureLowTime",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "precipIntensityMaxTime",
+            "columnName": "precipIntensityMaxTime",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3ee520c682c3a5366c3085b4528fa794\")"
+    ]
+  }
+}

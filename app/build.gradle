@@ -6,9 +6,15 @@ android {
         applicationId "com.mycode.weatherapp"
         minSdkVersion 20
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 9
+        versionName "9.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         release {
@@ -19,6 +25,10 @@ android {
     sourceSets{
         androidTest.java.srcDirs += "src/common-test/java"
         test.java.srcDirs += "src/common-test/java"
+    }
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
     }
 }
 repositories{
@@ -39,7 +49,19 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
+    // Dagger
+    def dagger_version = "2.22"
+
+    // Dagger2 core
+    implementation "com.google.dagger:dagger:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
+
+    // Dagger Android
+    implementation "com.google.dagger:dagger-android:$dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$dagger_version"
+    annotationProcessor "com.google.dagger:dagger-android-processor:$dagger_version"
     def junit_jupiter_version = "5.3.2"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_jupiter_version"
@@ -60,6 +82,7 @@ dependencies {
     //RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.1.7'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     //gson
     implementation 'com.google.code.gson:gson:2.8.5'

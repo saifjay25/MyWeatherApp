@@ -64,6 +64,9 @@ public class DatesAndTimes {
     }
 
     public String getTime(String time){
+        if(time ==null){
+            return "N/A";
+        }
         long numTime = Long.parseLong(time);
         String mi;
         String h;

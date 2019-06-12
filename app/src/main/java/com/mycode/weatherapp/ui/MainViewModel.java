@@ -1,40 +1,35 @@
 package com.mycode.weatherapp.ui;
 
-import android.app.Application;
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.LiveDataReactiveStreams;
-import androidx.lifecycle.MediatorLiveData;
-import com.mycode.weatherapp.Database.Repository;
+import androidx.lifecycle.ViewModel;
+
+import com.mycode.weatherapp.persistence.Repository;
 import com.mycode.weatherapp.entity.CurrentWeather;
 import com.mycode.weatherapp.entity.DailyWeatherData;
 import com.mycode.weatherapp.entity.Weather;
-import com.mycode.weatherapp.network.APIClient;
 import com.mycode.weatherapp.network.WeatherAPI;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import io.reactivex.Flowable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainViewModel extends AndroidViewModel {
+public class MainViewModel extends ViewModel {
 
     private WeatherAPI weatherAPI;
     private Repository repository;
     private LiveData<CurrentWeather> allCurrentData;
     private LiveData<List<DailyWeatherData>> allDailyData;
 
-    public MainViewModel(@NonNull Application application) {
-        super(application);
-        repository = new Repository(application);
-        allCurrentData = repository.getAllCurrentData();
-        allDailyData = repository.getAllDailyData();
-        this.weatherAPI = APIClient.getClient().create(WeatherAPI.class);
-    }
-
-    public MainViewModel(Repository repository, Application application) {
-        super(application);
+    @Inject
+    public MainViewModel(Repository repository, WeatherAPI weatherAPI) {
         this.repository = repository;
+        allCurrentData = this.repository.getAllCurrentData();
+        allDailyData = this.repository.getAllDailyData();
+        this.weatherAPI = weatherAPI;
     }
 
     public LiveData<Weather> currentAPICall(String key, Double latitude, Double longitude){
@@ -49,16 +44,17 @@ public class MainViewModel extends AndroidViewModel {
         );
     }
 
-    public LiveData<Resource<Integer>> addCurrentWeather(CurrentWeather currentWeather){
-        return LiveDataReactiveStreams.fromPublisher(
-                repository.insertCurrentData(currentWeather)
-        );
+    public Flowable<Resource<Integer>> addCurrentWeather(CurrentWeather currentWeather){
+        return repository.insertCurrentData(currentWeather);
     }
 
-    public LiveData<Resource<Integer>> deleteCurrentWeather(){
-        return LiveDataReactiveStreams.fromPublisher(
-                repository.deleteCurrentData()
-        );
+    public Flowable<Resource<Integer>> deleteCurrentWeather(){
+        return repository.deleteCurrentData();
+
+    }
+
+    public LiveData<Integer> getcount(){
+        return repository.getcount();
     }
 
     public LiveData<CurrentWeather> getAllCurrentData(){
@@ -66,16 +62,12 @@ public class MainViewModel extends AndroidViewModel {
     }
 
 
-    public LiveData<Resource<Integer>> addDailyWeather(DailyWeatherData dailyWeatherData){
-        return LiveDataReactiveStreams.fromPublisher(
-                repository.addDailyData(dailyWeatherData)
-        );
+    public Flowable<Resource<Integer>> addDailyWeather(DailyWeatherData dailyWeatherData){
+        return  repository.addDailyData(dailyWeatherData);
     }
 
-    public LiveData<Resource<Integer>> deleteDailyWeather(){
-        return LiveDataReactiveStreams.fromPublisher(
-                repository.deleteDailyData()
-        );
+    public Flowable<Resource<Integer>> deleteDailyWeather(){
+        return repository.deleteDailyData();
     }
 
 

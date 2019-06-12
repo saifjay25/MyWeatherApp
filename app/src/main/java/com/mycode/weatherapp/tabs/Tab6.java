@@ -2,7 +2,6 @@ package com.mycode.weatherapp.tabs;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -14,29 +13,42 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mycode.weatherapp.Database.Repository;
+import com.mycode.weatherapp.persistence.Repository;
 import com.mycode.weatherapp.R;
 import com.mycode.weatherapp.entity.DailyWeatherData;
 import com.mycode.weatherapp.entity.Weather;
 import com.mycode.weatherapp.ui.DatesAndTimes;
 import com.mycode.weatherapp.ui.MainViewModel;
+import com.mycode.weatherapp.viewmodels.ViewModelProviderFactory;
 
 import java.util.List;
 
+import javax.inject.Inject;
 
-public class Tab6 extends Fragment {
+import dagger.android.support.DaggerFragment;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
+
+public class Tab6 extends DaggerFragment {
     private String key;
     private Double latitude;
     private Double longitude;
     private String time;
+    private ImageView imageView;
     private MainViewModel viewModel;
     private TextView humidity,dewpoint,windspeed, preciptype, precipProb, precipaccu , tempLow, summary, temp;
     private Button moreInfo;
     private DailyWeatherData dailyWeather;
     private DatesAndTimes getTime;
     private static Weather gweather;
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
+    @Inject
+    ViewModelProviderFactory providerFactory;
 
     private OnFragmentInteractionListener mListener;
 
@@ -46,7 +58,7 @@ public class Tab6 extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getTime = new DatesAndTimes();
-        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel = ViewModelProviders.of(this,providerFactory).get(MainViewModel.class);
         if(getArguments() != null) {
             key = getArguments().getString("key");
             System.out.println(key);
@@ -66,14 +78,15 @@ public class Tab6 extends Fragment {
                                 break;
                             }
                         }
-                        temp.setText("Highest Temperature: "+dailyWeather.getTemperatureHigh());
-                        dewpoint.setText("DewPoint: "+dailyWeather.getDewPoint());
+                        temp.setText("Highest Temperature: "+dailyWeather.getTemperatureHigh()+"°");
+                        dewpoint.setText("DewPoint: "+dailyWeather.getDewPoint()+"°");
                         summary.setText("Summary: "+dailyWeather.getSummary());
-                        humidity.setText("Humidity: "+dailyWeather.getHumidity());
-                        windspeed.setText("Wind Speed: "+dailyWeather.getWindSpeed());
+                        setPic(summary.getText().toString());
+                        humidity.setText("Humidity: "+convertPercent(dailyWeather.getHumidity()));
+                        windspeed.setText("Wind Speed: "+dailyWeather.getWindSpeed()+" mph");
                         preciptype.setText("Precipitation Type: "+dailyWeather.getPrecipType());
                         precipProb.setText("Precipitation Probability: "+dailyWeather.getPrecipProbability());
-                        tempLow.setText("Lowest Temperature: "+dailyWeather.getTemperatureLow());
+                        tempLow.setText("Lowest Temperature: "+dailyWeather.getTemperatureLow()+"°");
                         precipaccu.setText("Wind Bearing: "+dailyWeather.getWindBearing());
                     }
                 }
@@ -89,17 +102,21 @@ public class Tab6 extends Fragment {
             @Override
             public void onChanged(Weather weather) {
                 weather.getDailyWeather().getData().get(0).setTab("Tab6");
-                viewModel.addDailyWeather(weather.getDailyWeather().getData().get(0));
+                mDisposable.add(viewModel.addDailyWeather(weather.getDailyWeather().getData().get(0))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe());
                 gweather = weather;
-                temp.setText("Highest Temperature: "+weather.getDailyWeather().getData().get(0).getTemperatureHigh());
+                temp.setText("Highest Temperature: "+weather.getDailyWeather().getData().get(0).getTemperatureHigh()+"°");
                 summary.setText("Summary: "+weather.getDailyWeather().getData().get(0).getSummary());
-                humidity.setText("Humidity: "+weather.getDailyWeather().getData().get(0).getHumidity());
-                dewpoint.setText("DewPoint: "+weather.getDailyWeather().getData().get(0).getDewPoint());
-                windspeed.setText("Wind Speed: "+weather.getDailyWeather().getData().get(0).getWindSpeed());
+                setPic(summary.getText().toString());
+                humidity.setText("Humidity: "+convertPercent(weather.getDailyWeather().getData().get(0).getHumidity()));
+                dewpoint.setText("DewPoint: "+weather.getDailyWeather().getData().get(0).getDewPoint()+"°");
+                windspeed.setText("Wind Speed: "+weather.getDailyWeather().getData().get(0).getWindSpeed()+" mph");
                 preciptype.setText("Precipitation Type: "+weather.getDailyWeather().getData().get(0).getPrecipType());
-                precipProb.setText("Precipitation Probability: "+weather.getDailyWeather().getData().get(0).getPrecipProbability());
+                precipProb.setText("Precipitation Probability: "+convertPercent(weather.getDailyWeather().getData().get(0).getPrecipProbability()));
                 precipaccu.setText("Wind Bearing: "+weather.getDailyWeather().getData().get(0).getWindBearing());
-                tempLow.setText("Lowest Temperature: "+weather.getDailyWeather().getData().get(0).getTemperatureLow());
+                tempLow.setText("Lowest Temperature: "+weather.getDailyWeather().getData().get(0).getTemperatureLow()+"°");
             }
         });
     }
@@ -114,6 +131,7 @@ public class Tab6 extends Fragment {
         windspeed = view.findViewById(R.id.windSpeed);
         preciptype = view.findViewById(R.id.precipT);
         precipProb = view.findViewById(R.id.precipP);
+        imageView = view.findViewById(R.id.pic1);
         precipaccu = view.findViewById(R.id.tempH);
         tempLow = view.findViewById(R.id.tempL);
         moreInfo = view.findViewById(R.id.moreInfo);
@@ -132,10 +150,10 @@ public class Tab6 extends Fragment {
                                     "Temperature Low Time: " + tempLowTime + "\n" + "\n" +
                                     "Sunrise Time: " + sunriseTime + "\n" + "\n" +
                                     "Sunset Time: " + sunsetTime + "\n" + "\n" +
-                                    "Cloud Cover: " + gweather.getDailyWeather().getData().get(0).getCloudCover() + "\n" + "\n" +
+                                    "Cloud Cover: " + convertPercent(gweather.getDailyWeather().getData().get(0).getCloudCover()) + "\n" + "\n" +
                                     "Pressure: " + gweather.getDailyWeather().getData().get(0).getPressure() + "\n" + "\n" +
                                     "MoonPhase: " + gweather.getDailyWeather().getData().get(0).getMoonPhase() + "\n" + "\n" +
-                                    "Visibility: " + gweather.getDailyWeather().getData().get(0).getVisibility());
+                                    "Visibility: " + gweather.getDailyWeather().getData().get(0).getVisibility()+" miles");
                 }else{
                     String precipMaxTime = getTime.getTime(dailyWeather.getPrecipIntensityMaxTime());
                     String sunriseTime = getTime.getTime(dailyWeather.getSunriseTime());
@@ -148,10 +166,10 @@ public class Tab6 extends Fragment {
                                     "Temperature Low Time: " + tempLowTime + "\n" + "\n" +
                                     "Sunrise Time: " + sunriseTime + "\n" + "\n" +
                                     "Sunset Time: " + sunsetTime + "\n" + "\n" +
-                                    "Cloud Cover: " + dailyWeather.getCloudCover() + "\n" + "\n" +
+                                    "Cloud Cover: " + convertPercent(dailyWeather.getCloudCover()) + "\n" + "\n" +
                                     "Pressure: " + dailyWeather.getPressure() + "\n" + "\n" +
                                     "MoonPhase: " + dailyWeather.getMoonPhase() + "\n" + "\n" +
-                                    "Visibility: " + dailyWeather.getVisibility());
+                                    "Visibility: " + dailyWeather.getVisibility()+" miles");
                 }
             }
         });
@@ -172,8 +190,50 @@ public class Tab6 extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mDisposable.clear();
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private String convertPercent(String num){
+        Double number = Double.parseDouble(num);
+        int percentage = (int) ((1 - number) * 100);
+        if (number == 0) {
+            percentage = 0;
+        }
+        return percentage+"%";
+    }
+    private void setPic(String summary){
+        if(summary.toLowerCase().contains("rain")){
+            imageView.setImageResource(R.mipmap.rain);
+            return;
+        }
+        if(summary.toLowerCase().contains("partly cloudy")){
+            imageView.setImageResource(R.mipmap.partlycloudy);
+            return;
+        }
+        if(summary.toLowerCase().contains("cloudy")){
+            imageView.setImageResource(R.mipmap.cloudy);
+            return;
+        }
+        if(summary.toLowerCase().contains("snow")){
+            imageView.setImageResource(R.mipmap.snow);
+            return;
+        }
+        if(summary.toLowerCase().contains("clear" ) || summary.toLowerCase().contains("sunny")){
+            imageView.setImageResource(R.mipmap.sunny);
+            return;
+        }
+        if(summary.toLowerCase().contains("wind" )|| summary.toLowerCase().contains("breezy")|| summary.toLowerCase().contains("windy")){
+            imageView.setImageResource(R.mipmap.wind);
+            return;
+        }
+        imageView.setImageResource(R.mipmap.partlycloudy);
     }
 }
