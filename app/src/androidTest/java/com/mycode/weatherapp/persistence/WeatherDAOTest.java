@@ -14,7 +14,8 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class WeatherDAOTest extends WeatherDatabaseTest {
-
+    
+    //for running tests that do work on a background thread so its runs everything on a single thread
     @Rule
     public InstantTaskExecutorRule rule = new InstantTaskExecutorRule();
 
