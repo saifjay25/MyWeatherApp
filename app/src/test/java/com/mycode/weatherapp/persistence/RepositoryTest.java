@@ -27,7 +27,8 @@ class RepositoryTest {
         MockitoAnnotations.initMocks(this);
         repository = new Repository(weatherDAO);
     }
-
+    //when weather is inserted to repository it will then return the returnData and it will check to see if valueReturn is equal
+    //to the returndata (which was converted to an int)
     @Test
     void insertCurrentData_returnRow() throws Exception{
         final long insertRow  =1L;
